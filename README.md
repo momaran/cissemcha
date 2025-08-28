@@ -87,69 +87,69 @@ cissemcha-main/
 
 ### 4.1 Lattice, field, and rates
 
-- 1D lattice with \(N\) sites, spacing \(a=L/(N-1)\), uniform field \(E=V/L\).  
+- 1D lattice with $$N$$ sites, spacing $$a=L/(N-1)$$, uniform field $$E=V/L$$.  
 - **Per-hop field energy** (right − left):  
-  \[
+  $$
   \Delta E_\text{field} = eEa = e\,\frac{V}{L}\,a.
-  \]  
+  $$  
   Implemented in `field_energy_bias_eV(...)` (in eV units).
 
 - **Arrhenius attempt time**:  
-  \[
+  $$
   \tau=\tau_0 \exp\!\left(\frac{U_\text{eff}}{k_BT}\right), \quad \Gamma_\text{pair}\approx \frac{2}{\tau}.
-  \]  
+  $$  
   Implemented in `attempt_pair_rate(...)`.
 
 - **Glauber split** (detailed balance for hop asymmetry):  
-  \[
+  $$
   w_R=\frac{\Gamma}{1+e^{-\Delta E/k_BT}},\quad w_L=\Gamma-w_R.
-  \]  
+  $$  
   Implemented in `glauber_rates(...)`.
 
-- **KMC step**: choose \(p_\mathrm{jump}\), then \(\Delta t=p_\mathrm{jump}/\Gamma\).  
+- **KMC step**: choose $$p_\mathrm{jump}$$, then $$\Delta t=p_\mathrm{jump}/\Gamma$$.  
   Per step:  
-  \[
+  $$
   p_R=w_R\Delta t,\quad p_L=w_L\Delta t,
-  \]  
+  $$  
   and draw right/left/no-move for each walker.  
   Probabilities are capped at <1 for stability.
 
 #### Boundary conditions (periodic/circular)
-- Right hop from \(N-1\) → counts as **Drained**, reappears at 0.  
-- Left hop from 0 → counts as **Sourced**, reappears at \(N-1\).  
+- Right hop from $$N-1$$ → counts as **Drained**, reappears at 0.  
+- Left hop from 0 → counts as **Sourced**, reappears at $$N-1$$.  
 - **Net current** = accumulated (Drained − Sourced) / total time.  
 
 ---
 
 ### 4.2 CISS (spin-dependent splitting)
 
-CISS is modeled as a spin-dependent energy splitting added to \(\Delta E_\text{field}\). Two parameterizations:
+CISS is modeled as a spin-dependent energy splitting added to $$\Delta E_\text{field}$$. Two parameterizations:
 
 #### A) Exact, polarization-driven (default)
-Prescribe a target spin polarization per hop \(P(V)\), e.g.  
-\[
+Prescribe a target spin polarization per hop $$P(V)$$, e.g.  
+$$
 P(V)=q_\mathrm{CISS}\tanh\!\left(\eta \frac{eEa}{k_BT}\right), \quad |P|<1.
-\]  
-Then the energy ensuring rate asymmetry = \(P\) under Glauber is:  
-\[
+$$  
+Then the energy ensuring rate asymmetry = $$P$$ under Glauber is:  
+$$
 \Delta E_\text{CISS}(V)=2k_BT\,\operatorname{arctanh}(\chi P(V)).
-\]  
+$$  
 
 - In code: `ciss_energy_split_eV(...)`  
-- Near \(V=0\): **linear slope**  
-- Large \(|V|\): saturation (tanh-like)  
+- Near $$V=0$$: **linear slope**  
+- Large $$|V|$$: saturation (tanh-like)  
 - Coupling is `q_ciss` (GUI: *CISS Effect*).  
 
 #### B) Linear-in-polarization (optional)
-\[
+$$
 \Delta E_\text{CISS}=\lambda_\text{CISS}\,k_BT\,P(V).
-\]  
-Equivalent to exact form at small \(P\); reproduces **gentle tilt near 0**.
+$$  
+Equivalent to exact form at small $$P$$; reproduces **gentle tilt near 0**.
 
-#### Total bias for spin \(\sigma=\pm 1\)
-\[
+#### Total bias for spin $$\sigma=\pm 1$$
+$$
 \Delta E_\text{total}^{(\sigma)} = \Delta E_\text{field} + \sigma\Delta E_\text{CISS} + \Delta E_\text{eMChA}.
-\]
+$$
 
 ---
 
@@ -157,20 +157,19 @@ Equivalent to exact form at small \(P\); reproduces **gentle tilt near 0**.
 
 Two models:
 
-#### Self-consistent \(B\cdot I\) (implemented)
-\[
+#### Self-consistent $$B\cdot I$$ (implemented)
+$$
 \Delta E_\text{eMChA} = \beta_\text{emcha}\,\chi\,(B_\text{tot} I_\text{est}),
-\]  
-with \(B_\text{tot}=B_\text{ext}+\mu_0 I_\text{est}/\text{pitch}\) if self-consistent option is enabled.  
-- Since \(I_\text{est}(V)\) flips with \(V\), \(B\cdot I\) is **even in \(V\)** — hallmark of eMChA.
+$$  
+with $$B_\text{tot}=B_\text{ext}+\mu_0 I_\text{est}/\text{pitch}$$ if self-consistent option is enabled.  
+- Since $$I_\text{est}(V)$$ flips with $$V$$, $$B\cdot I$$ is **even in $$V$$** — hallmark of eMChA.
 
-#### Explicit quadratic \(BV^2\) (optional)
-\[
+#### Explicit quadratic $$BV^2$$ (optional)
+$$
 \Delta E_\text{eMChA} = \beta^{(2)}_\text{emcha}\,\chi\,B\,V^2,
-\]  
-Strictly even in \(V\), convenient to separate CISS (odd) from eMChA (even).  
+$$  
+Strictly even in $$V$$, convenient to separate CISS (odd) from eMChA (even).  
 
----
 
 ## 5) Simulations (outputs per module)
 
