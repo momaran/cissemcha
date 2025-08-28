@@ -203,12 +203,14 @@ class SimulationType(Enum):
     IV_THREE_SOURCES      = 1
     IV_ALPHA_QCISS        = 2
     TRAJECTORY_HISTOGRAMS = 3
+    IV_EMCHA              = 4   # NEW
 
 _ROUTES = {
     0: ("simulations.steps_counters.sim",        "run"),
     1: ("simulations.iv_three_sources.sim",      "run"),
     2: ("simulations.iv_alpha_qciss.sim",        "run"),
     3: ("simulations.trajectory_histograms.sim", "run"),
+    4: ("simulations.iv_emcha.sim",              "run"),  # NEW
 }
 
 
