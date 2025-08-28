@@ -17,7 +17,7 @@ _ROUTES = {
     SimulationType.IV_THREE_SOURCES.value:      ("simulations.iv_three_sources.sim",      "run"),
     SimulationType.IV_ALPHA_QCISS.value:        ("simulations.iv_alpha_qciss.sim",        "run"),
     SimulationType.TRAJECTORY_HISTOGRAMS.value: ("simulations.trajectory_histograms.sim", "run"),
-    SimulationType.IV_EMCHA.value:               ("simulations.iv_emcha.sim",               "run"),
+    SimulationType.IV_EMCHA.value:              ("simulations.iv_emcha.sim",              "run"),
 }
 
 def _resolve_route(simulation_type: int) -> Tuple[str, str]:
