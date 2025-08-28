@@ -9,6 +9,7 @@ class SimulationType(Enum):
     IV_THREE_SOURCES      = 1  # I–V: unpolarized, beta-only, alpha-only
     IV_ALPHA_QCISS        = 2  # I–V: alpha-only for several q_ciss
     TRAJECTORY_HISTOGRAMS = 3  # GIF: particle histograms along the channel (α & β)
+    IV_EMCHA             = 4  # I–V: with electrical magnetochiral anisotropy (EMCA)
 
 # Map enum -> (module_path, function_name)
 _ROUTES = {
@@ -16,6 +17,7 @@ _ROUTES = {
     SimulationType.IV_THREE_SOURCES.value:      ("simulations.iv_three_sources.sim",      "run"),
     SimulationType.IV_ALPHA_QCISS.value:        ("simulations.iv_alpha_qciss.sim",        "run"),
     SimulationType.TRAJECTORY_HISTOGRAMS.value: ("simulations.trajectory_histograms.sim", "run"),
+    SimulationType.IV_EMCHA.value:               ("simulations.iv_emcha.sim",               "run"),
 }
 
 def _resolve_route(simulation_type: int) -> Tuple[str, str]:

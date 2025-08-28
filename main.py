@@ -8,7 +8,7 @@ if str(PROJ_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJ_ROOT))
 
 from read_data import read_data
-from simulations.Simulation_type import dispatch  # o 'simulation_type' si renombras
+from simulations.Simulation_type import dispatch
 
 def _to_namespace(d: dict) -> SimpleNamespace:
     return SimpleNamespace(**d)

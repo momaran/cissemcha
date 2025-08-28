@@ -37,24 +37,58 @@ def glauber_rates(DeltaE_eV, T, Gamma_pair):
     wL = Gamma_pair - wR
     return float(wR), float(wL)
 
-# --- New: CISS as a target spin polarization P(V) enforced via artanh ---
-def ciss_energy_split_eV(T, V, chirality, P0=None, Pmax=None, q=None):
+# --- CISS energetic splitting (additive; exact & linear modes) ---
+def ciss_energy_split_eV(
+    T,
+    V,
+    L,
+    positions,
+    q_ciss: float = 0.2,
+    eta: float = 1.0,
+    chirality: int = +1,
+    mode: str = "exact",
+):
     """
-    Return spin-independent CISS energy scale ΔE_ciss (apply ± with spin later).
-    We enforce: tanh(ΔE_ciss/(2kT)) = chirality * P(V).
-    Options:
-      - Constant polarization: P(V) = P0 in (0,1)
-      - Saturating vs bias:   P(V) = Pmax * tanh(q * V), with 0 < Pmax < 1
+    Return a spin-independent energy scale ΔE_CISS(V) in eV (sign applied later with spin σ=±1).
+
+    Modes:
+      - "exact"  : prescribe P(V) = q_ciss * tanh(eta * eEa/kBT) and enforce
+                   tanh(ΔE_CISS/(2kT)) = χ * P(V)  ->  ΔE_CISS = 2 kT * artanh(χ P)
+      - "linear" : small-bias approximation  ΔE_CISS ≈ 2 kT * (χ q_ciss eta * eEa/kBT)
+                   i.e., linear in V near zero (gives different slopes for α/β at V~0).
+
+    Args:
+        T          : temperature (K)
+        V          : applied voltage (V)
+        L          : molecule length (m)
+        positions  : number of lattice sites (N)
+        q_ciss     : coupling (0..1 typical)
+        eta        : shape factor in the tanh argument
+        chirality  : ±1
+        mode       : "exact" (default) or "linear"
     """
+    if q_ciss == 0.0:
+        return 0.0
+
+    N = max(int(positions), 2)
+    a = L / (N - 1)
+
+    # k_BT in eV:
     kT_eV = K_B_eV * T
-    if P0 is not None:
-        P = float(P0)
-    else:
-        if Pmax is None or q is None:
-            return 0.0
-        P = float(Pmax) * np.tanh(float(q) * V)
+
+    # dimensionless eEa/kBT using Joule-based k_B to avoid unit confusion:
+    #   x = (e E a) / (k_B T)  with E = V/L
+    x = (E_CHARGE * (V / max(L, 1e-12)) * a) / (K_B_J * T)
+
+    if str(mode).lower() == "linear":
+        # ΔE_CISS ≈ 2 kT * (χ q_ciss eta * x)   [eV]
+        return 2.0 * kT_eV * (chirality * q_ciss * eta * x)
+
+    # exact (default): ΔE_CISS = 2 kT * artanh(χ P), with P = q_ciss * tanh(eta x)
+    P = q_ciss * np.tanh(eta * x)
     P = np.clip(chirality * P, -0.999, 0.999)
-    return 2.0 * kT_eV * np.arctanh(P)  # eV
+    return 2.0 * kT_eV * np.arctanh(P)
+
 
 # --- New: eMChA as a chirality-odd, spin-independent energetic bias ---
 def emcha_bias_eV(B_parallel, I_est, beta_emcha, chirality):
@@ -92,18 +126,21 @@ def run_channel(cfg, V, Gamma_pair, dt, spin_sigma, Np,
     # Field bias per hop (independent of spin)
     DeltaE_field = field_energy_bias_eV(V, cfg.molecule_length, N, cfg.Temperature)
 
-    # CISS energy base (independent of spin; sign applied with spin_sigma)
+    # CISS energy base (spin-independent; sign applied with spin_sigma)
     DeltaE_ciss_base = 0.0
     if enable_ciss:
-        P0_cfg   = getattr(cfg, "ciss_P0", None)
-        Pmax_cfg = getattr(cfg, "ciss_Pmax", None)
-        q_cfg    = getattr(cfg, "ciss_q", None)
-        # Backward-compat: if nothing provided, use ciss_effect as constant P0
-        if P0_cfg is None and Pmax_cfg is None:
-            P0_cfg = float(getattr(cfg, "ciss_effect", 0.0))
+        q_ciss = float(getattr(cfg, "ciss_effect", getattr(cfg, "qCISS", 0.0)))
+        eta    = float(getattr(cfg, "ciss_eta", 1.0))
+        mode   = str(getattr(cfg, "ciss_mode", "exact")).lower()
         DeltaE_ciss_base = ciss_energy_split_eV(
-            cfg.Temperature, V, getattr(cfg, "chirality", 1),
-            P0=P0_cfg, Pmax=Pmax_cfg, q=q_cfg
+            cfg.Temperature,
+            V,
+            cfg.molecule_length,
+            int(cfg.positions),
+            q_ciss=q_ciss,
+            eta=eta,
+            chirality=int(getattr(cfg, "chirality", 1)),
+            mode=mode,
         )
 
     I_est = 0.0  # cumulative time-averaged current estimate (A) for this channel
@@ -174,7 +211,6 @@ def simulate_pair(cfg, V, alpha_count=None, beta_count=None, trace=False):
         cfg.tau_0
     )
 
-    # jump_probability preferred; fallback to diff_coefficient for backward-compat
     p_jump = float(getattr(cfg, "jump_probability", getattr(cfg, "diff_coefficient", 0.15)))
     p_jump = max(1e-4, min(0.3, p_jump))
     dt = p_jump / Gamma_pair
