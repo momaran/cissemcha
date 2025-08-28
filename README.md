@@ -13,6 +13,8 @@ pip install numpy matplotlib seaborn imageio
 # Run (opens the GUI)
 python main.py
 
+--.
+
 ## 1) Repository layout
 
 cissemcha-main/
