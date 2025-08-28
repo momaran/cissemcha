@@ -17,6 +17,8 @@ python main.py
 
 ## 1) Repository layout
 
+```bash
+
 cissemcha-main/
 ├── main.py                     # Entry point: opens the GUI and dispatches
 ├── read_data.py                # Tkinter GUI, validation, derived quantities
@@ -35,6 +37,8 @@ cissemcha-main/
 │       └── sim.py              # GIF: α and β position histograms along the channel
 ├── last_config.json            # Auto-saved GUI config (offered on next run)
 └── outputs/                    # Results, time-stamped subfolders
+
+```
 
 ## 2) How to run
 
