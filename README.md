@@ -171,6 +171,15 @@ Strictly even in ![equation](https://latex.codecogs.com/svg.latex?V), convenient
 - GIF of α/β particle histograms over time.  
 - Output: `spins_evolution.gif`.  
 
+### 5.5 `iv_emcha/sim.py`  *(NEW)*
+- I–V **solo canal α** con **eMChA** activado (CISS desactivado dentro del módulo).  
+- Trazas para **B = +B0, 0, −B0**, donde **B0 = |B_ext|** (si `B_ext=0` en la GUI, se usa 0.5 T por defecto).  
+- Usa `number_spins` como población α (β=0).  
+- **Salida**:  
+  - `IV_emcha_alpha.png`  
+  - `IV_emcha_alpha.csv` (columnas: `V`, `I_alpha_B+{B0}`, `I_alpha_B0`, `I_alpha_B-{B0}`)
+- **Nota física**: al no introducir término **par en B** (tipo B²) la curva de `B=0` es lineal cerca de `V=0` y las de `±B` son **tangentes** en el origen (asimetría tipo diodo lejos de 0 V).
+
 ---
 
 ## 6) Outputs
